@@ -1,0 +1,141 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+  <meta charset="UTF-8">
+  <title>leaflet & topojson POC</title>
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="map.css" media="screen" />
+</head>  
+<body>  
+  <div id="worldmap"></div>
+  <div class="country-name"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.0.6/chroma.min.js"></script>
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>  
+  <script src="https://d3js.org/topojson.v1.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+  integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+  crossorigin=""></script>
+
+  <script>
+    L.TopoJSON = L.GeoJSON.extend({
+      addData: function(jsonData) {    
+        if (jsonData.type === 'Topology') {
+          for (key in jsonData.objects) {
+            geojson = topojson.feature(jsonData, jsonData.objects[key]);
+            L.GeoJSON.prototype.addData.call(this, geojson);
+          }
+        }    
+        else {
+          L.GeoJSON.prototype.addData.call(this, jsonData);
+        }
+      }  
+    });
+  </script>
+
+
+  <script>
+      var countryMapping;
+      $.getJSON('data/countryMapping.json', function(response){
+           countryMapping = response;
+      }).error(function(e) { console.log("error during data/countryMapping.json processing"); console.log(e) })
+
+
+
+  </script>
+
+  <script>
+
+        (function(){
+    
+        'use strict'
+          
+        var map = L.map('worldmap',{maxZoom:10,minZoom:3}),
+          topoLayer = new L.TopoJSON(),
+          $tooltip = $('.country-name'),
+          colorScale = chroma
+            .scale(['#D5E3FF', '#003171'])
+            .domain([0,100]);
+        
+        map.setView([43,3], 3);
+    
+        $.getJSON('data/countries.topo.json').done(addTopoData);
+    
+        function addTopoData(topoData){
+          topoLayer.addData(topoData);
+          topoLayer.addTo(map);
+          topoLayer.eachLayer(handleLayer);
+        }
+
+// filename: "2019-04-26T17:21:19.983Z--13:20@GlenCove-NY-USA#40.89040119670414#-73.62983557402494.wav"
+// latitude: "40.8904011967041"
+// locationLocal: "GlenCove-NY-USA"
+// longitude: "-73.6298355740249"
+// recordingTimeUTC: "2019-04-26T17:21:19.983Z"
+// wakeUpTimeLocalMilitaryStyle: "13:20"
+        $.getJSON('data/recordings.json').done(addMarkerData);
+
+        function addMarkerData(markerData){
+          markerData.recordings.forEach(function(record) {
+            //console.log(record);
+            L.marker([record.latitude, record.longitude]).addTo(map).bindPopup("<b>" + record.locationLocal +"</b><br>"+ record.wakeUpTimeLocalMilitaryStyle +"</b><br>"+ record.recordingTimeUTC + 
+            "<audio controls src=\"" + "data/" + encodeURIComponent( record.filename) +   "\" </audio>" );
+          });
+        }
+
+        function retriveCountryValue(ISO_A2_countryCode){
+          //console.log("ISO_A2_countryCode:" + ISO_A2_countryCode);
+          if (! ISO_A2_countryCode || ISO_A2_countryCode === "-" ) return 0 ;
+          let resolvedValue = countryMapping.countries[ISO_A2_countryCode].value || 0 ;
+          return resolvedValue;
+        }
+    
+        function handleLayer(layer){
+            var countryCode = layer.feature.properties.ISO_A2 || null ;
+            var fillColor = colorScale(retriveCountryValue(countryCode)).hex();
+              
+            layer.setStyle({
+              fillColor : fillColor,
+              fillOpacity: 1,
+              color:'#555',
+              weight:1,
+              opacity:.5
+            });
+    
+            layer.on({
+              mouseover : enterLayer,
+              mouseout: leaveLayer
+            });
+        }
+    
+        function enterLayer(){
+          var countryName = this.feature.properties.ADMIN;
+          console.log("country name :" + countryName);
+          $tooltip.text(countryName).show();
+          
+          this.bringToFront();
+          this.setStyle({
+            weight:2,
+            opacity: 1
+          });
+        }
+    
+        function leaveLayer(){
+          $tooltip.hide();
+    
+          this.bringToBack();
+          this.setStyle({
+            weight:1,
+            opacity:.5
+          });
+        }
+    
+        }());
+    </script>  
+</body>  
+</html> 

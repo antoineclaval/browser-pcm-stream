@@ -1,0 +1,28 @@
+ *{
+    margin:0;
+    padding:0;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    box-sizing:border-box;
+  }
+  body,html,#worldmap{
+    height:100%;
+  }
+  body{
+    color:#333;
+    font-family:sans-serif;
+  }
+  #worldmap{
+    background:white;
+  }
+  .country-name{
+    position: absolute;
+    top: 2em;
+    right: 50em;
+    z-index: 1;
+    background: rgba(0,0,0,.75);
+    color: white;
+    padding: .5em .75em;
+    font-size: .85em;
+    display:none;
+  }
