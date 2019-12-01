@@ -1,0 +1,20 @@
+version: "3.7"
+services:
+
+  recorder:
+    image: aclaval/browser-pcm-stream:v-.1.05
+    ports:
+      - "3000:3000"
+    volumes:
+      - wav-file:/usr/src/app/uploads
+    environment:
+      - SENDGRID_API_KEY=YOUR_SENDGRID_KEY_HERE
+      - SUBSCRIPTION_DESTINATION=test@email.com
+    networks:
+      - frontend
+
+networks:
+  frontend:
+
+volumes:
+  wav-file:
