@@ -14,7 +14,7 @@ sudo docker run -p 3000:3000  -e SENDGRID_API_KEY="SEND-GrID-API-KEY" -e SUBSCRI
 
 ## Install docker on raw ubuntu ( 16.04 )
 
-'''
+```
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates
 sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
@@ -23,7 +23,8 @@ sudo apt-get update
 sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
 sudo apt-get install -y docker-engine
 sudo service docker start
-'''
+```
+
 
 ## Notes
 
